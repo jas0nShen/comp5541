@@ -14,7 +14,7 @@ from collections import Counter
 import warnings
 warnings.filterwarnings('ignore')
 
-# ── Configuration ──────────────────────────────────────────────────────────────
+# Configuration
 FILE = 'records_final_with_scores.xlsx'
 OUTPUT_DIR = '.'
 
@@ -27,7 +27,7 @@ COLORS = {
 BG_COLOR = '#FAFBFC'
 GRID_COLOR = '#E8ECF0'
 
-# ── Load Data with openpyxl ───────────────────────────────────────────────────
+# Load Data with openpyxl
 wb = openpyxl.load_workbook(FILE, data_only=True)
 print('Sheet names:', wb.sheetnames)
 
@@ -73,7 +73,7 @@ scores_all = {}
 for m in ['GPT', 'DeepSeek', 'Claude']:
     scores_all[m] = scores_reasoning[m] + scores_semantic[m]
 
-# ── Compute Statistics ─────────────────────────────────────────────────────────
+# Compute Statistics
 avg_scores = {}
 for m in ['GPT', 'DeepSeek', 'Claude']:
     avg_scores[m] = {
@@ -91,7 +91,7 @@ for m in ['GPT', 'DeepSeek', 'Claude']:
     score_dist[m] = Counter(int(x) for x in scores_all[m])
     print(f'\n{m} distribution: {dict(sorted(score_dist[m].items(), reverse=True))}')
 
-# ── Global Style Setup ─────────────────────────────────────────────────────────
+# Global Style Setup
 sns.set_style('whitegrid')
 plt.rcParams.update({
     'font.family': 'sans-serif',
@@ -116,9 +116,7 @@ models = ['GPT', 'DeepSeek', 'Claude']
 categories = ['Reasoning Ability', 'Semantic Understanding']
 
 
-# ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║  CHART 1: Grouped Bar Chart – Overall Performance Comparison               ║
-# ╚═══════════════════════════════════════════════════════════════════════════════╝
+# Chart 1: Grouped Bar Chart – Overall Performance Comparison
 def create_chart1():
     fig, ax = plt.subplots(figsize=(8, 5.5))
     fig.patch.set_facecolor(BG_COLOR)
@@ -171,9 +169,7 @@ def create_chart1():
     plt.close()
 
 
-# ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║  CHART 2: Donut Charts – Score Distribution                                ║
-# ╚═══════════════════════════════════════════════════════════════════════════════╝
+# Chart 2: Donut Charts – Score Distribution
 def create_chart2():
     fig, axes = plt.subplots(1, 3, figsize=(13, 4.8))
     fig.patch.set_facecolor(BG_COLOR)
@@ -247,9 +243,7 @@ def create_chart2():
     plt.close()
 
 
-# ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║  CHART 3: Radar Chart – Model Capability Spectrum                          ║
-# ╚═══════════════════════════════════════════════════════════════════════════════╝
+# Chart 3: Radar Chart – Model Capability Spectrum
 def create_chart3():
     dim_labels = []
     dims = []
@@ -345,7 +339,7 @@ def create_chart3():
     plt.close()
 
 
-# ── Generate All Charts ───────────────────────────────────────────────────────
+# Generate All Charts
 if __name__ == '__main__':
     create_chart1()
     create_chart2()

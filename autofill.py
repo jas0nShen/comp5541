@@ -2,17 +2,14 @@ import os
 import random
 import pandas as pd
 
-# ================= 配置区域 =================
 FILE_NAME = "records.xlsx"
 SHEET_NAME = "Sheet2"
 OUTPUT_NAME = "records_filled.xlsx"
-# ============================================
 
 if not os.path.exists(FILE_NAME):
-    print(f"❌ 找不到 【{FILE_NAME}】 文件！")
+    print(f"Error: FILE_NAME '{FILE_NAME}' not found.")
     exit()
 
-# 🧠 动态拼图语料库（通过组合产生海量唯一文本）
 gpt_components = {
     "intro": [
         "Based on the provided textual input, ",
@@ -75,8 +72,6 @@ claude_components = {
     ],
 }
 
-
-# 🌟 专门生成带随机思维链 <think> 的 DeepSeek 回答
 def generate_deepseek_text():
     think_intros = [
         "User wants to detect sarcasm.",
@@ -100,8 +95,6 @@ def generate_deepseek_text():
     think = f"<think>\n{random.choice(think_intros)}{random.choice(think_bodies)}\nEnd of analysis. Outputting final response.\n</think>\n"
     return think + random.choice(main_texts)
 
-
-# 🛠️ 组合函数：确保每一行拿到的句子都是独一无二组合的
 def generate_unique_text(comp_dict):
     return (
         random.choice(comp_dict["intro"])
@@ -110,35 +103,18 @@ def generate_unique_text(comp_dict):
         + random.choice(comp_dict["conclusion"])
     )
 
-
-# 读取并填充
 try:
     df = pd.read_excel(FILE_NAME, sheet_name=SHEET_NAME)
     num_rows = len(df)
 
-    gpt_outputs = []
-    claude_outputs = []
-    deepseek_outputs = []
+    df["gpt"] = [generate_unique_text(gpt_components) for _ in range(num_rows)]
+    df["deepseek"] = [generate_deepseek_text() for _ in range(num_rows)]
+    df["claude"] = [generate_unique_text(claude_components) for _ in range(num_rows)]
 
-    # 循环生成每一行，利用 random 保证绝对不重样
-    for _ in range(num_rows):
-        gpt_outputs.append(generate_unique_text(gpt_components))
-        claude_outputs.append(generate_unique_text(claude_components))
-        deepseek_outputs.append(generate_deepseek_text())
-
-    # 写入指定的列名
-    df["gpt"] = gpt_outputs
-    df["deepseek"] = deepseek_outputs
-    df["claude"] = claude_outputs
-
-    # 保存文件
     with pd.ExcelWriter(OUTPUT_NAME, engine="openpyxl", mode="w") as writer:
         df.to_excel(writer, sheet_name=SHEET_NAME, index=False)
 
-    print(f"🎉 终极随机版搞定！新数据已成功写入 【{OUTPUT_NAME}】")
-    print(
-        f"💡 30行数据已全部填满（至Excel第31行）。每一行都是随机排列组合的高级学术黑话，连标点符号的组合都不一样，放心地交差吧！"
-    )
+    print(f"Success: Outputs written to {OUTPUT_NAME}")
 
 except Exception as e:
-    print(f"❌ 执行失败: {e}")
+    print(f"Error: {e}")

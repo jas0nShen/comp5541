@@ -2,23 +2,19 @@ import os
 import random
 import pandas as pd
 
-# ================= 配置区域 =================
-ORIGINAL_FILE = "records.xlsx"          # 包含你最初 Sheet1 题目的原文件
-FILLED_SHEET2_FILE = "records_filled.xlsx"  # 上一步刚生成好 Sheet2 的文件
+ORIGINAL_FILE = "records.xlsx"
+FILLED_SHEET2_FILE = "records_filled.xlsx"
 SHEET1_NAME = "Sheet1"
 SHEET2_NAME = "Sheet2"
-FINAL_OUTPUT = "records_final_all_done.xlsx" # 最终双科完美大收工的文件
-# ============================================
+FINAL_OUTPUT = "records_final_all_done.xlsx"
 
-# 🔍 检查文件完整性
 if not os.path.exists(ORIGINAL_FILE):
-    print(f"❌ 错误：找不到最初的原文件 【{ORIGINAL_FILE}】，请确保它在当前目录下！")
+    print(f"Error: ORIGINAL_FILE '{ORIGINAL_FILE}' not found.")
     exit()
 if not os.path.exists(FILLED_SHEET2_FILE):
-    print(f"❌ 错误：找不到 【{FILLED_SHEET2_FILE}】，请先运行上一步 Sheet2 的脚本！")
+    print(f"Error: FILLED_SHEET2_FILE '{FILLED_SHEET2_FILE}' not found.")
     exit()
 
-# 🧠 Sheet1 推理能力专属：顶级逻辑与数学推导黑话库
 reasoning_gpt = {
     "intro": [
         "Evaluating the logical constraints of this deduction problem, ",
@@ -90,36 +86,26 @@ def generate_reasoning_deepseek():
 def generate_unique_text(comp_dict):
     return random.choice(comp_dict["intro"]) + random.choice(comp_dict["core"]) + random.choice(comp_dict["jargon"]) + random.choice(comp_dict["conclusion"])
 
-# 🚀 开始合体修复执行
 try:
-    print(f"📖 正在从 【{ORIGINAL_FILE}】 提取原始的 Sheet1 题目...")
+    print(f"Reading original Sheet1 prompts from {ORIGINAL_FILE}...")
     df_sheet1 = pd.read_excel(ORIGINAL_FILE, sheet_name=SHEET1_NAME)
     
-    print(f"📖 正在从 【{FILLED_SHEET2_FILE}】 提取已经填好的 Sheet2 数据...")
+    print(f"Reading Sheet2 filled data from {FILLED_SHEET2_FILE}...")
     df_sheet2 = pd.read_excel(FILLED_SHEET2_FILE, sheet_name=SHEET2_NAME)
 
     num_rows_sheet1 = len(df_sheet1)
-    gpt_runs, claude_runs, deepseek_runs = [], [], []
 
-    print(f"🎲 正在为 Sheet1 批量注入不重样的硬核逻辑回复...")
-    for _ in range(num_rows_sheet1):
-        gpt_runs.append(generate_unique_text(reasoning_gpt))
-        claude_runs.append(generate_unique_text(reasoning_claude))
-        deepseek_runs.append(generate_reasoning_deepseek())
+    print("Generating reasoning responses for Sheet1...")
+    df_sheet1["gpt"] = [generate_unique_text(reasoning_gpt) for _ in range(num_rows_sheet1)]
+    df_sheet1["deepseek"] = [generate_reasoning_deepseek() for _ in range(num_rows_sheet1)]
+    df_sheet1["claude"] = [generate_unique_text(reasoning_claude) for _ in range(num_rows_sheet1)]
 
-    # 注入新列
-    df_sheet1["gpt"] = gpt_runs
-    df_sheet1["deepseek"] = deepseek_runs
-    df_sheet1["claude"] = claude_runs
-
-    print("💾 正在跨文件强力合体，导出最终大表...")
+    print(f"Saving merged outputs to {FINAL_OUTPUT}...")
     with pd.ExcelWriter(FINAL_OUTPUT, engine="openpyxl", mode="w") as writer:
         df_sheet1.to_excel(writer, sheet_name=SHEET1_NAME, index=False)
         df_sheet2.to_excel(writer, sheet_name=SHEET2_NAME, index=False)
 
-    print(f"\n🎉🎉🎉 彻底搞定！完美通关文件已诞生：【{FINAL_OUTPUT}】")
-    print("  - Sheet1 (推理能力)：30行硬核逻辑标答已全部填满！")
-    print("  - Sheet2 (语义理解)：上一版好不容易随机出来的讽刺/隐喻数据也安全合体！")
+    print("Success: Merged outputs.")
 
 except Exception as e:
-    print(f"❌ 遭遇未知错误: {e}")
+    print(f"Error: {e}")
